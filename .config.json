@@ -1,0 +1,9 @@
+{
+  "scripts": [
+    {
+      "name": "Test",
+      "repository": "nathanaelcunningham/budget",
+      "script": "/home/nathanael/test.sh"
+    }
+  ]
+}

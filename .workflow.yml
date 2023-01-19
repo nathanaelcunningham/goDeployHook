@@ -1,0 +1,15 @@
+on:
+  issues:
+    types:
+      - opened
+jobs:
+  run_webhook:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: tailscale/github-action@v1
+        with:
+          authkey: ${secrets.TAILSCALE_AUTH}
+      - uses: distributhor/workflow-webhook@v3.0.2
+        with:
+          webhook_url: ${secrets.WEBHOOK_URL}
+          webhook_secret: ${secrets.WEBHOOK_SECRET}
