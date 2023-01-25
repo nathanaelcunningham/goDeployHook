@@ -93,4 +93,6 @@ func (a App) handleHook(w http.ResponseWriter, r *http.Request) {
 			w.Write([]byte(err.Error()))
 		}
 	}()
+
+	w.Write([]byte("started"))
 }
