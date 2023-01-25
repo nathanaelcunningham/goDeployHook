@@ -78,10 +78,12 @@ func (a App) handleHook(w http.ResponseWriter, r *http.Request) {
 	script := a.Config.FindScript(data.Repository)
 	log.Printf("%+v\n", script)
 
-	cmd := exec.Command(script.Script)
-	if err := cmd.Run(); err != nil {
-		log.Println("Error running script for ", script.Repository)
+	out, err := exec.Command(script.Script).CombinedOutput()
+	if err != nil {
+		log.Println(err)
 	}
+
+	log.Println(string(out))
 
 	if err != nil {
 		w.Write([]byte(err.Error()))
