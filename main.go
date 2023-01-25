@@ -74,19 +74,23 @@ func (a App) handleHook(w http.ResponseWriter, r *http.Request) {
 
 	var data HookData
 	err := decoder.Decode(&data)
-
-	script := a.Config.FindScript(data.Repository)
-	log.Printf("%+v\n", script)
-
-	out, err := exec.Command(script.Script).CombinedOutput()
 	if err != nil {
 		log.Println(err)
 	}
 
-	log.Println(string(out))
+	script := a.Config.FindScript(data.Repository)
+	log.Printf("%+v\n", script)
 
-	if err != nil {
-		w.Write([]byte(err.Error()))
-	}
+	go func() {
+		out, err := exec.Command(script.Script).CombinedOutput()
+		if err != nil {
+			log.Println(err)
+		}
 
+		log.Println(string(out))
+
+		if err != nil {
+			w.Write([]byte(err.Error()))
+		}
+	}()
 }
