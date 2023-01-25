@@ -90,7 +90,7 @@ func (a App) handleHook(w http.ResponseWriter, r *http.Request) {
 		log.Println(string(out))
 
 		if err != nil {
-			w.Write([]byte(err.Error()))
+			log.Println(err)
 		}
 	}()
 
