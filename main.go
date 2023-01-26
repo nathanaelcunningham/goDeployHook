@@ -6,13 +6,13 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"os/exec"
 
 	"github.com/spf13/viper"
 )
 
 type App struct {
 	Config Config
+	Q      Queue
 }
 
 func (c Config) FindScript(repo string) Script {
@@ -48,8 +48,14 @@ func main() {
 	configPath := flag.String("config", "./.config.json", "Path to .config.json")
 	flag.Parse()
 
-	app := App{}
+	app := App{
+		Q: Queue{
+			Jobs: make(chan Job),
+		},
+	}
 	app.loadConfig(*configPath)
+
+	app.Q.Start()
 
 	fmt.Printf("%+v\n", app.Config.Scripts)
 
@@ -69,7 +75,7 @@ type HookData struct {
 	RequestID  string `json:"requestID"`
 }
 
-func (a App) handleHook(w http.ResponseWriter, r *http.Request) {
+func (a *App) handleHook(w http.ResponseWriter, r *http.Request) {
 	decoder := json.NewDecoder(r.Body)
 
 	var data HookData
@@ -79,20 +85,10 @@ func (a App) handleHook(w http.ResponseWriter, r *http.Request) {
 	}
 
 	script := a.Config.FindScript(data.Repository)
-	log.Printf("%+v\n", script)
-
-	go func() {
-		out, err := exec.Command(script.Script).CombinedOutput()
-		if err != nil {
-			log.Println(err)
-		}
-
-		log.Println(string(out))
-
-		if err != nil {
-			log.Println(err)
-		}
-	}()
-
+	j := Job{
+		Repository: script.Repository,
+		Script:     script.Script,
+	}
+	a.Q.Jobs <- j
 	w.Write([]byte("started"))
 }
